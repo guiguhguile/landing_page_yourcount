@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 const Navbar = () => {
   const [isActive, setIsActive] = useState(null);
+  const [selected, setSelected] = useState("")
 
   useEffect(() => {
     window.addEventListener("scroll", () => {

@@ -1,54 +1,70 @@
 "use client";
-
+import * as React from "react";
 import Image from "next/image";
 import { CONTACTS } from "@/constants";
 import { DropdownForm } from "@/constants";
 import emailjs from "@emailjs/browser";
-import { useState } from "react";
+import { PhoneNumberMask } from "@/utils/mask";
+import { useForm } from "react-hook-form";
+import { schemaForm } from "@/validators/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useRef } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "./ui/toaster";
 
 const Form = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [enterprise, setEnterprise] = useState("");
-  const [invoicing, setInvoicing] = useState("");
+  const { toast } = useToast();
+  const {
+    handleSubmit,
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schemaForm),
+  });
 
-  const sendEmail = (e) => {
-    e.preventDefault();
+  const phoneValue = watch("phone");
 
+  useEffect(() => {
+    setValue("phone", PhoneNumberMask(phoneValue));
+  }, [phoneValue]);
+
+  const handleFormSubmit = (data) => {
     const templateParams = {
-      from_name: name,
-      email: email,
-      phone: phone,
-      enterprise: enterprise,
-      invoicing: invoicing,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      enterprise: data.enterpriseName,
+      invoice: data.invoice,
     };
 
     emailjs
       .send(
-        "service_wvdn5zd",
+        "service_2hbs5wy",
         "template_pz5isgi",
         templateParams,
         "yrlIt991TXgp2iqyE"
       )
       .then(
-        (response) => {
-          console.log("email enviado");
-          setName("");
-          setEmail("");
-          setPhone("");
-          setEnterprise("");
-          setInvoicing("");
+        () => {
+          toast({
+            title: "Email enviado!!",
+            description: "Entraremos em contato o mais rápido possível",
+          });
         },
         (err) => {
-          console.log("Erro", err);
+          toast({
+            title: "Ops",
+            description: "Algo deu errado ",
+          });
         }
       );
   };
 
   return (
     <section className="w-full bg-[#1b2f53] mb-10" id="form">
-      <div className="max-container padding-container flex flex-col items-center gap-20 py-10 pb-32 md:gap-40 lg:py-20 lg:flex-row">
+      <div className="max-container padding-container flex flex-col items-center lg:gap-56 gap-28  py-10 pb-32  lg:py-20 lg:flex-row">
         <div className="z-20 flex w-full flex-col lg:w-[50%]">
           <div className="relative flex flex-col lg:items-start items-center">
             <h2 className="font-bold text-[35px] lg:text-left text-center leading-[120%] text-white ">
@@ -68,58 +84,82 @@ const Form = () => {
             ))}
           </ul>
         </div>
-        <div className="lg:w-[50%]">
+        <div className="lg:w-[50%] w-[100%]">
           <form
             className="flex-1  p-8 rounded-[20px] border-2 border-white"
-            onSubmit={sendEmail}
+            onSubmit={handleSubmit(handleFormSubmit)}
           >
-            <div className="space-y-5 mt-5 mb-5">
-              <input
-                className="w-full outline-none bg-white p-3  rounded"
-                type="text"
-                placeholder="Qual seu nome?"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                className="w-full outline-none bg-white p-3 rounded"
-                type="email"
-                placeholder="E-mail corporativo"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                className="w-full outline-none bg-white p-3 rounded"
-                type="tel"
-                placeholder="Seu Telefone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              <input
-                className="w-full outline-none bg-white p-3 rounded"
-                type="tel"
-                placeholder="Nome da empresa"
-                value={enterprise}
-                onChange={(e) => setEnterprise(e.target.value)}
-              />
-              <select
-                className="w-full p-3 outline-none rounded"
-                value={invoicing}
-                onChange={(e) => setInvoicing(e.target.value)}
-              >
-                <option value="">Qual é o faturamento mensal?</option>
-                {DropdownForm.map((title) => (
-                  <option value={title}>{title}</option>
-                ))}
-              </select>
+            <div className="space-y-10 mt-5 mb-5">
+              <div>
+                <input
+                  className="w-full outline-none  bg-white p-3  rounded  focus:shadow-md focus:shadow-secundary-blue"
+                  type="text"
+                  placeholder="Qual seu nome?"
+                  {...register("name")}
+                />
+                {errors.name && (
+                  <span className="text-red-300">{errors.name.message}</span>
+                )}
+              </div>
+              <div>
+                <input
+                  className="w-full outline-none  bg-white p-3 rounded focus:shadow-md focus:shadow-secundary-blue"
+                  type="text"
+                  placeholder="E-mail corporativo"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <span className="text-red-300">{errors.email.message}</span>
+                )}
+              </div>
+              <div>
+                <input
+                  className="w-full outline-none  bg-white p-3 rounded focus:shadow-md focus:shadow-secundary-blue"
+                  type="tel"
+                  placeholder="Seu Telefone"
+                  {...register("phone")}
+                />
+                {errors.phone && (
+                  <span className="text-red-300">{errors.phone.message}</span>
+                )}
+              </div>
+              <div>
+                <input
+                  className="w-full outline-none  bg-white p-3 rounded focus:shadow-md focus:shadow-secundary-blue"
+                  type="text"
+                  placeholder="Nome da empresa"
+                  {...register("enterpriseName")}
+                />
+                {errors.enterpriseName && (
+                  <span className="text-red-300">
+                    {errors.enterpriseName.message}
+                  </span>
+                )}
+              </div>
+              <div>
+                <select
+                  {...register("invoice")}
+                  className="w-full outline-none bg-white p-3 rounded focus:shadow-md focus:shadow-secundary-blue"
+                >
+                  <option>Selecione o Faturmento mensal</option>
+                  {DropdownForm.map((item) => (
+                    <option value={item}>{item}</option>
+                  ))}
+                </select>
+                {errors.invoice && (
+                  <span className="text-red-300">{errors.invoice.message}</span>
+                )}
+              </div>
             </div>
             <button
               type="submit"
-              className="text-white mt-6 w-full bg-[#1cbae9] p-3 mb-3 rounded"
+              className="text-white mt-6 w-full bg-[#1cbae9] p-3 mb-3 rounded hover:scale-105"
             >
               RECEBER MAIS INFORMAÇÕES
             </button>
           </form>
+
+          <Toaster />
         </div>
       </div>
     </section>

@@ -26,7 +26,7 @@ export default function SlideMobile() {
   ];
 
   return (
-    <Carousel className=" w-[100%] max-w-xs lg:hidden">
+    <Carousel className="  w-[100%] max-w-xs lg:hidden flex mt-[20px]">
       <CarouselContent>
         {imageItemsMobile.map((item, index) => (
           <CarouselItem key={index}>
